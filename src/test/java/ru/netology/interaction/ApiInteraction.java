@@ -1,5 +1,6 @@
 package ru.netology.interaction;
 
+import io.qameta.allure.restassured.AllureRestAssured;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.filter.log.LogDetail;
 import io.restassured.http.ContentType;
@@ -8,22 +9,31 @@ import ru.netology.data.Card;
 import ru.netology.data.DataHelper;
 
 import static io.restassured.RestAssured.given;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ApiInteraction {
+    private static String baseUrl = "http://localhost";
+    private static int port = 8080;
+    private static String badRequestMessage = "Bad Request";
+
+
     private static RequestSpecification requestSpec = new RequestSpecBuilder()
-            .setBaseUri("http://localhost")
-            .setPort(8080)
+            .setBaseUri(baseUrl)
+            .setPort(port)
             .setAccept(ContentType.JSON)
             .setContentType(ContentType.JSON)
             .log(LogDetail.ALL)
+            .addFilter(new AllureRestAssured())
             .build();
 
-    public static String sentPaymentByCard(Card card) {
+    public static String sentPayment(Card card, String url) {
         DataHelper.ResponseApi bodyResponse = given()
                 .spec(requestSpec)
                 .body(card)
                 .when()
-                .post("api/v1/pay")
+                .post(url)
                 .then()
                 .statusCode(200)
                 .extract()
@@ -31,129 +41,48 @@ public class ApiInteraction {
         return bodyResponse.getStatus();
     }
 
-    public static String sentPaymentByCredit(Card card) {
-        DataHelper.ResponseApi bodyResponse = given()
-                .spec(requestSpec)
-                .body(card)
-                .when()
-                .post("api/v1/credit")
-                .then()
-                .statusCode(200)
-                .extract()
-                .body().as(DataHelper.ResponseApi.class);
-        return bodyResponse.getStatus();
-    }
-
-    public static String sentPaymentByCardOnlyNumber() {
-        String bodyResponse = given()
+    public static String sentPaymentOnlyNumber(String url) {
+        return given()
                 .spec(requestSpec)
                 .body("{\"number\" : \"4444 4444 4444 4441\"}")
                 .when()
-                .post("api/v1/pay")
+                .post(url)
                 .then()
                 .statusCode(400)
                 .extract()
                 .body().asString();
-        return bodyResponse;
     }
 
-    public static String sentRequestPaymentByCardWithoutBody() {
-        String bodyResponse = given()
-                .spec(requestSpec)
-                .when()
-                .post("api/v1/pay")
-                .then()
-                .statusCode(400)
-                .extract()
-                .body().asString();
-        return bodyResponse;
-    }
-
-    public static String sentRequestPaymentByCreditWithoutBody() {
-        String bodyResponse = given()
-                .spec(requestSpec)
-                .when()
-                .post("api/v1/credit")
-                .then()
-                .statusCode(400)
-                .extract()
-                .body().asString();
-        return bodyResponse;
-    }
-
-    public static String sentPaymentByBadCard(Card card) {
-        String bodyResponse = given()
+    public static String sentPaymentByNoDbCard(Card card, String url) {
+        return given()
                 .spec(requestSpec)
                 .body(card)
                 .when()
-                .post("api/v1/pay")
+                .post(url)
                 .then()
                 .statusCode(500)
                 .extract()
                 .body().asString();
-        return bodyResponse;
     }
 
-    public static String sentPaymentByBadCredit(Card card) {
-        String bodyResponse = given()
+    public static String sentPaymentByApprovedCardBadField(Card card, String url) {
+        return given()
                 .spec(requestSpec)
                 .body(card)
                 .when()
-                .post("api/v1/credit")
-                .then()
-                .statusCode(500)
-                .extract()
-                .body().asString();
-        return bodyResponse;
-    }
-
-    public static String sentPaymentByApprovedCardBadField(Card card) {
-        String bodyResponse = given()
-                .spec(requestSpec)
-                .body(card)
-                .when()
-                .post("api/v1/pay")
+                .post(url)
                 .then()
                 .statusCode(400)
                 .extract()
                 .body().asString();
-        return bodyResponse;
     }
 
-    public static String sentPaymentByApprovedCreditBadField(Card card) {
-        String bodyResponse = given()
-                .spec(requestSpec)
-                .body(card)
-                .when()
-                .post("api/v1/credit")
-                .then()
-                .statusCode(400)
-                .extract()
-                .body().asString();
-        return bodyResponse;
+    public static void assertStatus(String expect, String fact) {
+        assertEquals(expect, fact);
     }
 
-    public static String sentGetRequestPaymentByCard() {
-        String bodyResponse = given()
-                .spec(requestSpec)
-                .when()
-                .get("api/v1/pay")
-                .then()
-                .statusCode(405)
-                .extract()
-                .body().asString();
-        return bodyResponse;
+    public static void assertBadRequest(String response) {
+        assertThat(response, containsString(badRequestMessage));
     }
 
-    public static String sentGetRequestPaymentByCredit() {
-        String bodyResponse = given()
-                .spec(requestSpec)
-                .when()
-                .get("api/v1/credit")
-                .then()
-                .statusCode(405)
-                .extract()
-                .body().asString();
-        return bodyResponse;
-    }
 }

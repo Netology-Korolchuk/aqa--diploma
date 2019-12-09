@@ -30,21 +30,12 @@ public class Card {
                 faker.numerify("###"));
     }
 
-    public static Card generatedApprovedCardWithNowDate(String local) {
-        Faker faker = new Faker(new Locale(local));
-        return new Card(approvedCard,
-                String.valueOf(LocalDate.now().getMonthValue()),
-                String.valueOf(LocalDate.now().getYear()).substring(2),
-                faker.name().firstName().concat(".").concat(faker.name().lastName()).concat("-").concat(faker.name().lastName()),
-                faker.numerify("###"));
-    }
-
     public static Card generatedDeclinedCard(String local) {
         Faker faker = new Faker(new Locale(local));
         return new Card(declinedCard,
-                getMonthFromArray(setGoodMonth()),
-                String.valueOf(LocalDate.now().plusYears(getRandomInt()).getYear()).substring(2),
-                faker.name().username(),
+                String.valueOf(LocalDate.now().getMonthValue()),
+                String.valueOf(LocalDate.now().getYear()).substring(2),
+                faker.name().firstName().substring(0, 1).concat(".").concat(faker.name().lastName()),
                 faker.numerify("###"));
     }
 
@@ -57,15 +48,6 @@ public class Card {
                 faker.numerify("###"));
     }
 
-    public static Card generatedCardWithMinChar(String local) {
-        Faker faker = new Faker(new Locale(local));
-        return new Card(faker.business().creditCardNumber().replace("-", " ").substring(1),
-                getMonthFromArray(setBadMonth()),
-                String.valueOf(LocalDate.now().plusYears(getRandomInt()).getYear()).substring(3),
-                faker.name().firstName().substring(0, 1),
-                faker.numerify("##"));
-    }
-
     public static Card generatedCardWithMaxChar() {
         Faker faker = new Faker();
         return new Card(faker.business().creditCardNumber().replace("-", " ").concat("1"),
@@ -73,95 +55,6 @@ public class Card {
                 String.valueOf(LocalDate.now().plusYears(getRandomInt()).getYear()).substring(1),
                 "adadaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaagfggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggfgggggggggggggdgfretererertytytytytyaaaaaaaaaaaaaaaaaaaaaadddddddddd",
                 faker.numerify("####"));
-    }
-
-    public static Card generatedCardWithLetters(String local) {
-        Faker faker = new Faker(new Locale(local));
-        return new Card(faker.letterify("???? ???? ???? ????"),
-                faker.letterify("??"),
-                faker.letterify("??"),
-                faker.numerify("#. #####"),
-                faker.letterify("???"));
-    }
-
-    public static Card generatedCardWithSpecialChar() {
-        return new Card("?#@! ()/* $%^& _=-+",
-                "@<",
-                ">:",
-                ";. {}?`~",
-                "№[]");
-    }
-
-    public static Card generatedCardWithEmptyCardBadMonthHolderCvv() {
-        Faker faker = new Faker();
-        return new Card("",
-                "13",
-                String.valueOf(LocalDate.now().plusYears(getRandomInt()).getYear()).substring(2),
-                faker.name().firstName().concat(" Иванов"),
-                faker.numerify("#"));
-    }
-
-    public static Card generatedCardWithMixedCardCvvExpiredYear(String local) {
-        Faker faker = new Faker(new Locale(local));
-        return new Card(faker.bothify("?#&? ???> ???$ @???"),
-                getMonthFromArray(setGoodMonth()),
-                String.valueOf(LocalDate.now().minusYears(getRandomInt()).getYear()).substring(2),
-                faker.name().firstName().substring(0, 1).concat(".").concat(faker.name().lastName()),
-                faker.bothify("??%"));
-    }
-
-    public static Card generatedCardWithBadCardExpiredMonthEmptyCvv(String local) {
-        Faker faker = new Faker(new Locale(local));
-        return new Card(String.valueOf(getRandomInt()),
-                String.valueOf(LocalDate.now().minusMonths(1).getMonthValue()),
-                String.valueOf(LocalDate.now().getYear()).substring(2),
-                faker.name().firstName().substring(0, 1).concat("/").concat(faker.name().lastName()),
-                "");
-    }
-
-    public static Card generatedNoDbCardWithBigFutureYearEmptyHolder() {
-        Faker faker = new Faker();
-        return new Card(faker.business().creditCardNumber().replace("-", " "),
-                getMonthFromArray(setGoodMonth()),
-                String.valueOf(LocalDate.now().plusYears(7).getYear()).substring(2),
-                "",
-                faker.numerify("###"));
-    }
-
-    public static Card generatedApprovedCardWithBigFutureYear(String local) {
-        Faker faker = new Faker(new Locale(local));
-        return new Card(approvedCard,
-                getMonthFromArray(setGoodMonth()),
-                String.valueOf(LocalDate.now().plusYears(7).getYear()).substring(2),
-                faker.name().firstName().concat(".").concat(faker.name().lastName()).concat("/").concat(faker.name().lastName()),
-                faker.numerify("###"));
-    }
-
-    public static Card generatedApprovedCardWithMixedMonthYear(String local) {
-        Faker faker = new Faker(new Locale(local));
-        return new Card(approvedCard,
-                faker.bothify("(?"),
-                faker.bothify("?,"),
-                "xxx",
-                faker.numerify("###"));
-    }
-
-    public static Card generatedApprovedCardWithEmptyMonthYear() {
-        Faker faker = new Faker();
-        return new Card(approvedCard,
-                "",
-                "",
-                "cardholder",
-                faker.numerify("###"));
-    }
-
-    public static Card generatedNoDbCardWithBadHolder(String local) {
-        Faker faker = new Faker(new Locale(local));
-        return new Card(faker.business().creditCardNumber().replace("-", ""),
-                getMonthFromArray(setGoodMonth()),
-                String.valueOf(LocalDate.now().plusYears(getRandomInt()).getYear()).substring(2),
-                faker.bothify("?. ???#@??"),
-                faker.numerify("###"));
     }
 
     private static List<String> setGoodMonth() {

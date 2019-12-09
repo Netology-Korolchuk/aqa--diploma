@@ -18,11 +18,11 @@
 
 ## Инструкция по запуску
 * склонировать репозиторий `git clone https://github.com/12ok/aqa--diploma`
-* перейти в директорию `/artifact/gate-simulator`
-* собрать образ командой `docker image build -t node-app:1.0 .`
-* вернуться в директорию проекта
 * запустить docker container `docker-compose up -d` Дождаться пока контейнеры запустятся
 * запустить приложение `java -jar ./artifacts/aqa-shop.jar`. Приложение запускается на порту `8080`
-* выполнить команду для запуска тестов `./gradlew test` (для Linux), `./gradlew.bat test` (для Windows) 
-* отчет о выполнении тестов находится в директории `build/reports/tests/`
+* выполнить команду для запуска тестов `./gradlew clean test` (для Linux), `./gradlew.bat clean test` (для Windows) 
+* результаты выполнения тестов находитяся в директории build/allure-results
+* выполнить команду для формирования отчета gradlew allureReport
+* отчет о выполнении тестов находится в директории build/reports/allure-report/
+* выполнить команду для открытия отчета в браузере gradlew allureServe
 

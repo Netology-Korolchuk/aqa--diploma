@@ -1,142 +1,140 @@
 package ru.netology;
 
+import com.codeborne.selenide.Configuration;
+import com.codeborne.selenide.junit5.SoftAssertsExtension;
+import com.codeborne.selenide.logevents.SelenideLogger;
+import io.qameta.allure.selenide.AllureSelenide;
 import lombok.val;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import ru.netology.data.Card;
 import ru.netology.interaction.ApiInteraction;
 import ru.netology.interaction.DbInteraction;
 
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
+import static com.codeborne.selenide.AssertionMode.SOFT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static ru.netology.data.DataHelper.*;
 
 public class TestApi {
+    private static Card approvedCard;
+    private static Card declinedCard;
+    private static Card noDbCard;
 
-    @AfterAll
-    static void cleanDb() {
+    @BeforeAll
+    static void setUpAll() {
+        SelenideLogger.addListener("allure", new AllureSelenide());
+        approvedCard = Card.generatedApprovedCard("en");
+        declinedCard = Card.generatedDeclinedCard("ru");
+        noDbCard = Card.generatedNoDbCard();
+    }
+
+    @AfterEach
+    void cleanDb() {
         DbInteraction.clearDB();
     }
 
-    @Test
-    @DisplayName("Отправка валидной карты - оплата по карте")
-    void shouldPositiveResponsePay() {
-        val card = Card.generatedApprovedCard("ru");
-        String response = ApiInteraction.sentPaymentByCard(card);
-        assertEquals(PaymentResult.APPROVED.toString(), response);
+    @ParameterizedTest
+    @CsvSource({"api/v1/pay", "api/v1/credit"})
+    @DisplayName("Отправка валидной карты")
+    void shouldPositiveResponsePay(String url) {
+        String response = ApiInteraction.sentPayment(approvedCard, url);
+        ApiInteraction.assertStatus(PaymentResult.APPROVED.toString(), response);
+
+        selectDbAssertAfterValidate(url, PaymentResult.APPROVED.toString());
     }
 
-    @Test
-    @DisplayName("Отправка валидной карты - оплата в кредит")
-    void shouldPositiveResponseCredit() {
-        val card = Card.generatedApprovedCard("en");
-        String response = ApiInteraction.sentPaymentByCredit(card);
-        assertEquals(PaymentResult.APPROVED.toString(), response);
+    @ParameterizedTest
+    @CsvSource({"api/v1/pay", "api/v1/credit"})
+    @DisplayName("Отправка declined карты")
+    void shouldNegativeResponsePay(String url) {
+        String response = ApiInteraction.sentPayment(declinedCard, url);
+        ApiInteraction.assertStatus(PaymentResult.DECLINED.toString(), response);
+
+        selectDbAssertAfterValidate(url, PaymentResult.DECLINED.toString());
     }
 
-    @Test
-    @DisplayName("Отправка declined карты - оплата по карте")
-    void shouldNegativeResponsePay() {
-        val card = Card.generatedDeclinedCard("en");
-        String response = ApiInteraction.sentPaymentByCard(card);
-        assertEquals(PaymentResult.DECLINED.toString(), response);
+
+    @ParameterizedTest
+    @CsvSource({"api/v1/pay", "api/v1/credit"})
+    @DisplayName("Отправка карты не из БД")
+    void shouldValidateCard(String url) {
+        String response = ApiInteraction.sentPaymentByNoDbCard(noDbCard, url);
+        ApiInteraction.assertBadRequest(response);
+
+        selectDbAssertAfterNoValidate(url);
     }
 
-    @Test
-    @DisplayName("Отправка declined карты - оплата в кредит")
-    void shouldNegativeResponseCredit() {
-        val card = Card.generatedDeclinedCard("ru");
-        String response = ApiInteraction.sentPaymentByCredit(card);
-        assertEquals(PaymentResult.DECLINED.toString(), response);
-    }
+    @ParameterizedTest
+    @CsvSource({"api/v1/pay", "api/v1/credit"})
+    @DisplayName("Валидная карта, пустой месяц - оплата по карте")
+    void shouldValidateEmptyKeyCard(String url) {
+        approvedCard.setMonth("");
+        String response = ApiInteraction.sentPaymentByApprovedCardBadField(approvedCard, url);
+        ApiInteraction.assertBadRequest(response);
 
-    @Test
-    @DisplayName("Отправка карты не из БД - оплата по карте")
-    void shouldValidateCard() {
-        val card = Card.generatedNoDbCard();
-        String response = ApiInteraction.sentPaymentByBadCard(card);
-        assertThat(response, containsString("400 Bad Request"));
-    }
-
-    @Test
-    @DisplayName("Отправка карты не из БД - оплата в кредит")
-    void shouldValidateCredit() {
-        val card = Card.generatedNoDbCard();
-        String response = ApiInteraction.sentPaymentByBadCredit(card);
-        assertThat(response, containsString("400 Bad Request"));
-    }
-
-    @Test
-    @DisplayName("Get запрос - отплата по карте")
-    void shouldValidateGetRequestCard() {
-        String response = ApiInteraction.sentGetRequestPaymentByCard();
-        assertThat(response, containsString("Method Not Allowed"));
-    }
-
-    @Test
-    @DisplayName("Get запрос - отплата в кредит")
-    void shouldValidateGetRequestCredit() {
-        String response = ApiInteraction.sentGetRequestPaymentByCredit();
-        assertThat(response, containsString("Method Not Allowed"));
-    }
-
-    @Test
-    @DisplayName("Отправка запроса с пустым body - оплата по карте")
-    void shouldValidateEmptyBodyCard() {
-        String response = ApiInteraction.sentRequestPaymentByCardWithoutBody();
-        assertThat(response, containsString("Bad Request"));
-    }
-
-    @Test
-    @DisplayName("Отправка запроса с пустым body - оплата в кредит")
-    void shouldValidateEmptyBodyCredit() {
-        String response = ApiInteraction.sentRequestPaymentByCreditWithoutBody();
-        assertThat(response, containsString("Bad Request"));
-    }
-
-    @Test
-    @DisplayName("Валидная карта, пустые дата и год - оплата по карте")
-    void shouldValidateEmptyKeyCard() {
-        val card = Card.generatedApprovedCardWithEmptyMonthYear();
-        String response = ApiInteraction.sentPaymentByApprovedCreditBadField(card);
-        assertThat(response, containsString("Bad Request"));
+        selectDbAssertAfterNoValidate(url);
     }
     //todo issue ex-"Bad request" fac-approved
 
-    @Test
-    @DisplayName("Валидная карта, пустые дата и год - оплата в кредит")
-    void shouldValidateEmptyKeyCredit() {
-        val card = Card.generatedApprovedCardWithEmptyMonthYear();
-        String response = ApiInteraction.sentPaymentByApprovedCreditBadField(card);
-        assertThat(response, containsString("Bad Request"));
+    @ParameterizedTest
+    @CsvSource({"api/v1/pay", "api/v1/credit"})
+    @DisplayName("Валидная карта, невалидные год - оплата по карте")
+    void shouldValidateBadFormatKeyCard(String url) {
+        approvedCard.setYear("%^");
+        String response = ApiInteraction.sentPaymentByApprovedCardBadField(approvedCard, url);
+        ApiInteraction.assertBadRequest(response);
+
+        selectDbAssertAfterNoValidate(url);
+    }
+
+    @ParameterizedTest
+    @CsvSource({"api/v1/pay", "api/v1/credit"})
+    @DisplayName("Отправка только номера карты")
+    void shouldValidateBody(String url) {
+        String response = ApiInteraction.sentPaymentOnlyNumber(url);
+        ApiInteraction.assertBadRequest(response);
+
+        selectDbAssertAfterNoValidate(url);
     }
     //todo issue ex-"Bad request" fac-approved
 
-    @Test
-    @DisplayName("Валидная карта, невалидные дата и месяц - оплата по карте")
-    void shouldValidateBadFormatKeyCard() {
-        val card = Card.generatedApprovedCardWithMixedMonthYear("en");
-        String response = ApiInteraction.sentPaymentByApprovedCardBadField(card);
-        assertThat(response, containsString("Bad Request"));
+    public void selectDbAssertAfterValidate(String url, String paymentResult) {
+        if (url.equals("api/v1/pay")) {
+            assertDbAfterPayByCard(paymentResult);
+        } else assertDbAfterPayByCredit(paymentResult);
     }
 
-    @Test
-    @DisplayName("Валидная карта, невалидные дата и месяц - оплата в кредит")
-    void shouldValidateBadFormatKeyCredit() {
-        val card = Card.generatedApprovedCardWithMixedMonthYear("ru");
-        String response = ApiInteraction.sentPaymentByApprovedCreditBadField(card);
-        assertThat(response, containsString("Bad Request"));
+    public void selectDbAssertAfterNoValidate(String url) {
+        if (url.equals("api/v1/pay")) {
+            assertDbAfterNoValidateCard();
+        }
+        assertDbAfterNoValidateCredit();
     }
 
-    @Test
-    @DisplayName("Отправка только номера карты - отплата по карте")
-    void shouldValidateBody() {
-        String response = ApiInteraction.sentPaymentByCardOnlyNumber();
-        assertThat(response, containsString("Bad Request"));
+    public void assertDbAfterPayByCard(String paymentResult) {
+        val paymentFromDb = DbInteraction.getPaymentByCard();
+        assertEquals(paymentResult, DbInteraction.getPaymentByCard().getStatus());
+        assertTrue(DbInteraction.isOrderByPaymentExist(paymentFromDb.getTransaction_id()));
     }
-    //todo issue ex-"Bad request" fac-approved
+
+    public void assertDbAfterNoValidateCard() {
+        assertEquals(0, DbInteraction.getCountRowCard());
+        assertEquals(0, DbInteraction.getCountRowOrder());
+    }
+
+
+    public void assertDbAfterPayByCredit(String paymentResult) {
+        val paymentFromDb = DbInteraction.getPaymentByCredit();
+        assertEquals(paymentResult, DbInteraction.getPaymentByCredit().getStatus());
+        assertTrue(DbInteraction.isOrderByCreditExist(paymentFromDb.getBank_id()));
+    }
+
+    public void assertDbAfterNoValidateCredit() {
+        assertEquals(0, DbInteraction.getCountRowCredit());
+        assertEquals(0, DbInteraction.getCountRowOrder());
+    }
 }
 

@@ -7,13 +7,32 @@ import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 import ru.netology.data.DataHelper;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.sql.DriverManager;
+import java.util.Properties;
 
 public class DbInteraction {
-    private static String url = "jdbc:mysql://192.168.99.100:3306/app";
-    private static String userDB = "app";
-    private static String password = "pass";
+
+    private static String url; // = System.getProperty("spring.datasource.url");
+    private static String userDB; // = System.getProperty("spring.datasource.username");
+    private static String password; // = System.getProperty("spring.datasource.password");
     private static QueryRunner runner = new QueryRunner();
+
+    static {
+        Properties property = new Properties();
+        try (FileInputStream file = new FileInputStream("application-test.properties")) {
+            property.load(file);
+            url = property.getProperty("spring.datasource.url", "jdbc:postgresql://192.168.99.100:5432/app");
+            userDB = property.getProperty("spring.datasource.username");
+            password = property.getProperty("spring.datasource.password");
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     @SneakyThrows
     public static void clearDB() {
@@ -70,13 +89,20 @@ public class DbInteraction {
     }
 
     @SneakyThrows
-    public static boolean getOrderById(String id) {
+    public static boolean isOrderByPaymentExist(String id) {
         val orderSQL = "SELECT COUNT(*) FROM order_entity WHERE payment_id = ?;";
         try (val conn = DriverManager.getConnection(url, userDB, password)) {
             Long countOrderById = runner.query(conn, orderSQL, new ScalarHandler<>(), id);
-            if (countOrderById > 0) {
-                return true;
-            } else return false;
+            return countOrderById > 0;
+        }
+    }
+
+    @SneakyThrows
+    public static boolean isOrderByCreditExist(String id) {
+        val orderSQL = "SELECT COUNT(*) FROM order_entity WHERE credit_id = ?;";
+        try (val conn = DriverManager.getConnection(url, userDB, password)) {
+            Long countOrderById = runner.query(conn, orderSQL, new ScalarHandler<>(), id);
+            return countOrderById > 0;
         }
     }
 }
