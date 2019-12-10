@@ -23,7 +23,6 @@ public class PayForm {
     private SelenideElement yearMessage = formFields.find(text("Год")).$(".input__sub");
     private SelenideElement holderMessage = formFields.find(text("Владелец")).$(".input__sub");
     private SelenideElement cvvMessage = formFields.find(text("CVC/CVV")).$(".input__sub");
-    private SelenideElement closeMessage = $(".icon-button .icon");
     private SelenideElement priceString = $("ul :nth-child(4)");
     private SelenideElement goodPopup = $(".notification_status_ok");
     private SelenideElement badPopup = $(".notification_status_error");
@@ -42,28 +41,6 @@ public class PayForm {
         yearInput.setValue(card.getYear());
         holderInput.setValue(card.getHolder());
         cvvInput.setValue(card.getCvc());
-        buttonContinue.click();
-    }
-
-    public void setFormFiledAndRefresh(Card card) {
-        cardInput.setValue(card.getNumber());
-        monthInput.setValue(card.getMonth());
-        yearInput.setValue(card.getYear());
-        holderInput.setValue(card.getHolder());
-        cvvInput.setValue(card.getCvc());
-        refresh();
-    }
-
-    public void assertFieldsIsEmpty() {
-        assertEquals("", cardInput.getValue());
-        assertEquals("", monthInput.getValue());
-        assertEquals("", yearInput.getValue());
-        assertEquals("", holderInput.getValue());
-        assertEquals("", cvvInput.getValue());
-    }
-
-    public void setFormRepeatedly() {
-        closeMessage.click();
         buttonContinue.click();
     }
 
@@ -92,12 +69,12 @@ public class PayForm {
     }
 
     public void assertGoodMessage() {
-        goodPopup.waitUntil(visible, 10000);
+        goodPopup.waitUntil(visible, 15000);
         badPopup.shouldNotBe(visible);
     }
 
     public void assertBadMessage() {
-        badPopup.waitUntil(visible, 10000);
+        badPopup.waitUntil(visible, 15000);
         goodPopup.shouldNotBe(visible);
     }
 

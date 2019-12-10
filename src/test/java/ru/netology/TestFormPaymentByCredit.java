@@ -1,12 +1,9 @@
 package ru.netology;
 
-import com.codeborne.selenide.Configuration;
-import com.codeborne.selenide.junit5.SoftAssertsExtension;
 import com.codeborne.selenide.logevents.SelenideLogger;
 import io.qameta.allure.selenide.AllureSelenide;
 import lombok.val;
 import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvFileSource;
 import ru.netology.data.Card;
@@ -14,7 +11,6 @@ import ru.netology.data.DataHelper;
 import ru.netology.interaction.DbInteraction;
 import ru.netology.page.PayForm;
 
-import static com.codeborne.selenide.AssertionMode.SOFT;
 import static com.codeborne.selenide.Selenide.open;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -39,7 +35,6 @@ public class TestFormPaymentByCredit {
         DbInteraction.clearDB();
     }
 
-
     @Test
     @DisplayName("Купить тур в кредит: APPROVED карта, валидные значения для формы")
     void shouldPayByApprovedCredit() {
@@ -62,29 +57,6 @@ public class TestFormPaymentByCredit {
         page.assertBadMessage();
     }
     //todo issue ex -"declined" fac -"approved"
-
-    @Test
-    @DisplayName("Повторная оплата с той же карты")
-    void shouldPayByApprovedCardWithRepeat() {
-        open(serviceUrl);
-        val page = new PayForm();
-        page.setPayByCredit();
-        page.setFormFiled(approvedCard);
-        page.assertGoodMessage();
-        page.setFormRepeatedly();
-        page.assertGoodMessage();
-    }
-
-    @Test
-    @DisplayName("Обновление страницы во время заполнения данных - оплата в кредит")
-    void shouldEmptyCardFormAfterRefresh() {
-        open(serviceUrl);
-        val page = new PayForm();
-        page.setPayByCredit();
-        page.setFormFiledAndRefresh(declinedCard);
-        page.setPayByCard();
-        page.assertFieldsIsEmpty();
-    }
 
     @Test
     @DisplayName("Отправка формы с картой не из базы - оплата в кредит")
@@ -178,12 +150,11 @@ public class TestFormPaymentByCredit {
         page.setPayByCredit();
         page.setFormFiled(approvedCard);
         page.assertMessageCvv("Неверно указан срок действия карты");
-        page.assertNoExistHolderMessage();
     }
 
     public void assertDbAfterPayByCredit(String paymentResult) {
         val paymentFromDb = DbInteraction.getPaymentByCredit();
         assertEquals(paymentResult, DbInteraction.getPaymentByCredit().getStatus());
-        assertTrue(DbInteraction.isOrderByCreditExist(paymentFromDb.getBank_id()));
+        assertTrue(DbInteraction.isOrderByCreditExist(paymentFromDb.getBank_id()),"Не найдена оплата в таблице заказов");
     }
 }

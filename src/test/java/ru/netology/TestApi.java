@@ -1,19 +1,15 @@
 package ru.netology;
 
-import com.codeborne.selenide.Configuration;
-import com.codeborne.selenide.junit5.SoftAssertsExtension;
 import com.codeborne.selenide.logevents.SelenideLogger;
 import io.qameta.allure.selenide.AllureSelenide;
 import lombok.val;
 import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import ru.netology.data.Card;
 import ru.netology.interaction.ApiInteraction;
 import ru.netology.interaction.DbInteraction;
 
-import static com.codeborne.selenide.AssertionMode.SOFT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static ru.netology.data.DataHelper.*;
@@ -56,7 +52,6 @@ public class TestApi {
         selectDbAssertAfterValidate(url, PaymentResult.DECLINED.toString());
     }
 
-
     @ParameterizedTest
     @CsvSource({"api/v1/pay", "api/v1/credit"})
     @DisplayName("Отправка карты не из БД")
@@ -69,7 +64,7 @@ public class TestApi {
 
     @ParameterizedTest
     @CsvSource({"api/v1/pay", "api/v1/credit"})
-    @DisplayName("Валидная карта, пустой месяц - оплата по карте")
+    @DisplayName("Валидная карта, пустой месяц")
     void shouldValidateEmptyKeyCard(String url) {
         approvedCard.setMonth("");
         String response = ApiInteraction.sentPaymentByApprovedCardBadField(approvedCard, url);
@@ -81,7 +76,7 @@ public class TestApi {
 
     @ParameterizedTest
     @CsvSource({"api/v1/pay", "api/v1/credit"})
-    @DisplayName("Валидная карта, невалидные год - оплата по карте")
+    @DisplayName("Валидная карта, невалидные год")
     void shouldValidateBadFormatKeyCard(String url) {
         approvedCard.setYear("%^");
         String response = ApiInteraction.sentPaymentByApprovedCardBadField(approvedCard, url);
@@ -117,7 +112,7 @@ public class TestApi {
     public void assertDbAfterPayByCard(String paymentResult) {
         val paymentFromDb = DbInteraction.getPaymentByCard();
         assertEquals(paymentResult, DbInteraction.getPaymentByCard().getStatus());
-        assertTrue(DbInteraction.isOrderByPaymentExist(paymentFromDb.getTransaction_id()));
+        assertTrue(DbInteraction.isOrderByPaymentExist(paymentFromDb.getTransaction_id()), "Не найдена оплата в таблице заказов");
     }
 
     public void assertDbAfterNoValidateCard() {
@@ -125,11 +120,10 @@ public class TestApi {
         assertEquals(0, DbInteraction.getCountRowOrder());
     }
 
-
     public void assertDbAfterPayByCredit(String paymentResult) {
         val paymentFromDb = DbInteraction.getPaymentByCredit();
         assertEquals(paymentResult, DbInteraction.getPaymentByCredit().getStatus());
-        assertTrue(DbInteraction.isOrderByCreditExist(paymentFromDb.getBank_id()));
+        assertTrue(DbInteraction.isOrderByCreditExist(paymentFromDb.getBank_id()),"Не найдена оплата в таблице заказов");
     }
 
     public void assertDbAfterNoValidateCredit() {

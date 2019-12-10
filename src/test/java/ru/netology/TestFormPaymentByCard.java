@@ -1,19 +1,15 @@
 package ru.netology;
 
-import com.codeborne.selenide.Configuration;
-import com.codeborne.selenide.junit5.SoftAssertsExtension;
 import com.codeborne.selenide.logevents.SelenideLogger;
 import io.qameta.allure.selenide.AllureSelenide;
 import lombok.val;
 import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvFileSource;
 import ru.netology.data.Card;
 import ru.netology.interaction.DbInteraction;
 import ru.netology.page.PayForm;
 
-import static com.codeborne.selenide.AssertionMode.SOFT;
 import static com.codeborne.selenide.Selenide.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -40,8 +36,6 @@ public class TestFormPaymentByCard {
         DbInteraction.clearDB();
     }
 
-
-
     @Test
     @DisplayName("Купить тур по карте: APPROVED карта, валидные значения для формы")
     void shouldPayByApprovedCard() {
@@ -66,30 +60,6 @@ public class TestFormPaymentByCard {
         page.assertBadMessage();
     }
     //todo issue ex -"declined" fac -"approved"
-
-    @Test
-    @DisplayName("Повторная оплата с той же карты")
-    void shouldPayByApprovedCardWithRepeat() {
-        open(serviceUrl);
-        val page = new PayForm();
-        priceTour = page.getPriceTour() * 100;
-        page.setPayByCard();
-        page.setFormFiled(approvedCard);
-        page.assertGoodMessage();
-        page.setFormRepeatedly();
-        page.assertGoodMessage();
-    }
-
-    @Test
-    @DisplayName("Обновление страницы во время заполнения данных - оплата картой")
-    void shouldEmptyCardFormAfterRefresh() {
-        open(serviceUrl);
-        val page = new PayForm();
-        page.setPayByCard();
-        page.setFormFiledAndRefresh(declinedCard);
-        page.setPayByCard();
-        page.assertFieldsIsEmpty();
-    }
 
     @Test
     @DisplayName("Отправка формы с картой не из базы - оплата по карте")
@@ -174,7 +144,7 @@ public class TestFormPaymentByCard {
     }
 
     @Test
-    @DisplayName("Отправка формы с невалидно датой и пустым владельцем - оплата картой")
+    @DisplayName("Отправка формы с невалидной датой и пустым владельцем - оплата картой")
     void shouldValidateExpiredField() {
         approvedCard.setYear("18");
         approvedCard.setHolder("");
@@ -183,13 +153,12 @@ public class TestFormPaymentByCard {
         page.setPayByCard();
         page.setFormFiled(approvedCard);
         page.assertMessageCvv("Истёк срок действия карты");
-        page.assertNoExistHolderMessage();
     }
 
     public void assertDbAfterPayByCard(String paymentResult, int price) {
         val paymentFromDb = DbInteraction.getPaymentByCard();
         assertEquals(paymentResult, DbInteraction.getPaymentByCard().getStatus());
         assertEquals(price, paymentFromDb.getAmount());
-        assertTrue(DbInteraction.isOrderByPaymentExist(paymentFromDb.getTransaction_id()));
+        assertTrue(DbInteraction.isOrderByPaymentExist(paymentFromDb.getTransaction_id()),"Не найдена оплата в таблице заказов");
     }
 }

@@ -22,7 +22,7 @@ public class DbInteraction {
 
     static {
         Properties property = new Properties();
-        try (FileInputStream file = new FileInputStream("application-test.properties")) {
+        try (FileInputStream file = new FileInputStream("application.properties")) {
             property.load(file);
             url = property.getProperty("spring.datasource.url", "jdbc:postgresql://192.168.99.100:5432/app");
             userDB = property.getProperty("spring.datasource.username");
