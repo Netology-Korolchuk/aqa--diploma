@@ -12,17 +12,32 @@
     * созданы тесты для проверки записей в БД
     * созданы тесты для API сервиса покупки
 1. Подготовке отчётных документов по итогам автоматизированного тестирования
-1. Подготовка отчётных документов по итогам автоматизации
+    * [Отчет по итогам автоматизации]()
+    * [Найденные баги]()
+1. Подготовка отчётных документов по итогам автоматизации - [Отчет по итогам работы]()
 
-[Комментарии/Вопросы по дипломному проекту](https://github.com/12ok/aqa--diploma/issues/2)
+
 
 ## Инструкция по запуску
 * склонировать репозиторий `git clone https://github.com/12ok/aqa--diploma`
 * запустить docker container `docker-compose up -d` Дождаться пока контейнеры запустятся
-* запустить приложение `java -jar ./artifacts/aqa-shop.jar`. Приложение запускается на порту `8080`
+### Для запуска приложения с MySQL
+* запустить приложение `java -Dspring.datasource.url=jdbc:mysql://192.168.99.100:3306/app -jar ./artifacts/aqa-shop.jar`. 
 * выполнить команду для запуска тестов `./gradlew clean test` (для Linux), `./gradlew.bat clean test` (для Windows) 
-* результаты выполнения тестов находитяся в директории `build/allure-results`
+* результаты выполнения тестов находятся в директории `build/allure-results`
 * выполнить команду для формирования отчета `gradlew allureReport`
 * отчет о выполнении тестов находится в директории `build/reports/allure-report/`
 * выполнить команду для открытия отчета в браузере `gradlew allureServe`
+
+### Для запуска приложения с PostgreSQL
+* запустить приложение `java -Dspring.datasource.url=jdbc:postgresql://192.168.99.100:5432/app -jar artifacts/aqa-shop.jar`
+* выполнить команду для запуска тестов `./gradlew clean test -Ddb.url=jdbc:postgresql://192.168.99.100:5432/app` (для Linux), `./gradlew.bat clean test -Ddb.url=jdbc:postgresql://192.168.99.100:5432/app` (для Windows) 
+* результаты выполнения тестов находятся в директории `build/allure-results`
+* выполнить команду для формирования отчета `gradlew allureReport`
+* отчет о выполнении тестов находится в директории `build/reports/allure-report/`
+* выполнить команду для открытия отчета в браузере `gradlew allureServe`
+
+
+
+
 

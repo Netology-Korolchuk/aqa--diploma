@@ -2,11 +2,11 @@ package ru.netology.page;
 
 import com.codeborne.selenide.ElementsCollection;
 import com.codeborne.selenide.SelenideElement;
+import io.qameta.allure.Step;
 import ru.netology.data.Card;
 
 import static com.codeborne.selenide.Condition.*;
 import static com.codeborne.selenide.Selenide.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class PayForm {
     private SelenideElement buttonPayByCard = $$(".button").find(exactText("Купить"));
@@ -27,14 +27,17 @@ public class PayForm {
     private SelenideElement goodPopup = $(".notification_status_ok");
     private SelenideElement badPopup = $(".notification_status_error");
 
+    @Step("Выбор варианта оплаты по карте")
     public void setPayByCard() {
         buttonPayByCard.click();
     }
 
+    @Step("Выбор варианта оплаты в кредит")
     public void setPayByCredit() {
         buttonPayByCredit.click();
     }
 
+    @Step("Установка значений в поля и отправка формы")
     public void setFormFiled(Card card) {
         cardInput.setValue(card.getNumber());
         monthInput.setValue(card.getMonth());
@@ -44,48 +47,49 @@ public class PayForm {
         buttonContinue.click();
     }
 
+    @Step("Проверка сообщения об ошибке поля card")
     public void assertMessageCard(String message) {
         cardMessage.shouldHave(exactText(message));
     }
 
+    @Step("Проверка сообщения об ошибке поля month")
     public void assertMessageMonth(String message) {
         monthMessage.shouldHave(exactText(message));
     }
 
+    @Step("Проверка сообщения об ошибке поля year")
     public void assertMessageYear(String message) {
         yearMessage.shouldHave(exactText(message));
     }
 
+    @Step("Проверка сообщения об ошибке поля holder")
     public void assertMessageHolder(String message) {
         holderMessage.shouldHave(exactText(message));
     }
 
+    @Step("Проверка сообщения об ошибке поля cvv")
     public void assertMessageCvv(String message) {
         cvvMessage.shouldHave(exactText(message));
     }
 
+    @Step("Проверка отсутствия сообщения об ошибке для поля holder")
     public void assertNoExistHolderMessage() {
         holderMessage.shouldNotBe(exist);
     }
 
+    @Step("Проверка сообщения об успешной оплате")
     public void assertGoodMessage() {
         goodPopup.waitUntil(visible, 15000);
-        badPopup.shouldNotBe(visible);
+        badPopup.shouldNotBe(visible.because("Видно должно быть только одно сообщение"));
     }
 
+    @Step("Проверка сообщения о неуспешной оплате")
     public void assertBadMessage() {
         badPopup.waitUntil(visible, 15000);
-        goodPopup.shouldNotBe(visible);
+        goodPopup.shouldNotBe(visible.because("Видно должно быть только одно сообщение"));
     }
 
-    public void assertValueField(Card card) {
-        assertEquals(card.getNumber().substring(0, 19), cardInput.getValue());
-        assertEquals(card.getMonth().substring(0, 2), monthInput.getValue());
-        assertEquals(card.getYear().substring(0, 2), yearInput.getValue());
-        assertEquals(card.getHolder(), holderInput.getValue());
-        assertEquals(card.getCvc().substring(0, 3), cvvInput.getValue());
-    }
-
+    @Step("Получение цены тура")
     public int getPriceTour() {
         String price = priceString.getText().replaceAll("\\D+", "");
         return Integer.parseInt(price);

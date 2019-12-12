@@ -1,6 +1,7 @@
 package ru.netology.data;
 
 import com.github.javafaker.Faker;
+import io.qameta.allure.Step;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -21,6 +22,7 @@ public class Card {
     private static String approvedCard = "4444 4444 4444 4441";
     private static String declinedCard = "4444 4444 4444 4442";
 
+    @Step("Генерация approved card")
     public static Card generatedApprovedCard(String local) {
         Faker faker = new Faker(new Locale(local));
         return new Card(approvedCard,
@@ -30,6 +32,7 @@ public class Card {
                 faker.numerify("###"));
     }
 
+    @Step("Генерация declined card")
     public static Card generatedDeclinedCard(String local) {
         Faker faker = new Faker(new Locale(local));
         return new Card(declinedCard,
@@ -39,6 +42,7 @@ public class Card {
                 faker.numerify("###"));
     }
 
+    @Step("Генерация NoDb card")
     public static Card generatedNoDbCard() {
         Faker faker = new Faker();
         return new Card(faker.business().creditCardNumber().replace("-", " "),
@@ -48,23 +52,9 @@ public class Card {
                 faker.numerify("###"));
     }
 
-    public static Card generatedCardWithMaxChar() {
-        Faker faker = new Faker();
-        return new Card(faker.business().creditCardNumber().replace("-", " ").concat("1"),
-                getMonthFromArray(setBadMonth()).concat(getMonthFromArray(setGoodMonth())),
-                String.valueOf(LocalDate.now().plusYears(getRandomInt()).getYear()).substring(1),
-                "adadaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaagfggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggfgggggggggggggdgfretererertytytytytyaaaaaaaaaaaaaaaaaaaaaadddddddddd",
-                faker.numerify("####"));
-    }
-
     private static List<String> setGoodMonth() {
         List<String> goodMonth = Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12");
         return goodMonth;
-    }
-
-    private static List<String> setBadMonth() {
-        List<String> badMonth = Arrays.asList("1", "2", "3", "4", "5", "6", "7", "8", "9");
-        return badMonth;
     }
 
     private static String getMonthFromArray(List<String> list) {

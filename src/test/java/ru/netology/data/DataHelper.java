@@ -20,14 +20,6 @@ public class DataHelper {
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
-    public static class PaymentByCreditDto {
-        private String bank_id;
-        private String status;
-    }
-
-    @Data
-    @AllArgsConstructor
-    @NoArgsConstructor
     public static class ResponseApi {
         private String status;
     }

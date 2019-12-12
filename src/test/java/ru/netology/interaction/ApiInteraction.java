@@ -1,5 +1,6 @@
 package ru.netology.interaction;
 
+import io.qameta.allure.Step;
 import io.qameta.allure.restassured.AllureRestAssured;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.filter.log.LogDetail;
@@ -14,11 +15,9 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ApiInteraction {
-    private static String baseUrl = "http://localhost";
-    private static int port = 8080;
+    private static String baseUrl = System.getProperty("app.url");
+    private static int port = Integer.parseInt(System.getProperty("app.port"));
     private static String badRequestMessage = "Bad Request";
-
-
     private static RequestSpecification requestSpec = new RequestSpecBuilder()
             .setBaseUri(baseUrl)
             .setPort(port)
@@ -28,6 +27,7 @@ public class ApiInteraction {
             .addFilter(new AllureRestAssured())
             .build();
 
+    @Step("Отправка POST запроса с approved/declined card")
     public static String sentPayment(Card card, String url) {
         DataHelper.ResponseApi bodyResponse = given()
                 .spec(requestSpec)
@@ -41,6 +41,7 @@ public class ApiInteraction {
         return bodyResponse.getStatus();
     }
 
+    @Step("Отправка POST запроса только с номером карты в body")
     public static String sentPaymentOnlyNumber(String url) {
         return given()
                 .spec(requestSpec)
@@ -53,6 +54,7 @@ public class ApiInteraction {
                 .body().asString();
     }
 
+    @Step("Отправка POST запроса с NoDb card")
     public static String sentPaymentByNoDbCard(Card card, String url) {
         return given()
                 .spec(requestSpec)
@@ -65,6 +67,7 @@ public class ApiInteraction {
                 .body().asString();
     }
 
+    @Step("Отправка POST запроса с невалидными значениями")
     public static String sentPaymentByApprovedCardBadField(Card card, String url) {
         return given()
                 .spec(requestSpec)
@@ -77,12 +80,13 @@ public class ApiInteraction {
                 .body().asString();
     }
 
+    @Step("Проверка статуса платежа")
     public static void assertStatus(String expect, String fact) {
-        assertEquals(expect, fact);
+        assertEquals(expect, fact, "Статуст платежа не соответствует ожидаемому");
     }
 
+    @Step("Проверка наличия ошибки в ответе на запрос")
     public static void assertBadRequest(String response) {
         assertThat(response, containsString(badRequestMessage));
     }
-
 }
