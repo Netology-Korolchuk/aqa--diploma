@@ -6,11 +6,6 @@
 Задача разложена на 4 этапа:
 1. Планировании автоматизации тестирования - [План](https://github.com/12ok/aqa--diploma/blob/master/documents/Plan.md)
 1. Непосредственно самой автоматизации
-    * созданы тесты для UI
-        * оплата по карте
-        * оплата в кредит
-    * созданы тесты для проверки записей в БД
-    * созданы тесты для API сервиса покупки
 1. Подготовке отчётных документов по итогам автоматизированного тестирования
     * [Отчет по итогам автоматизации](https://github.com/12ok/aqa--diploma/blob/master/documents/Report.md)
     * [Найденные баги](https://github.com/12ok/aqa--diploma/issues)
@@ -19,6 +14,10 @@
 
 
 ## Инструкция по запуску
+**Для запуска необходим Docker или Docker Toolbox**.
+В `application.properties` и `build.gradle` указаны настройки для **Docker Toolbox**.
+Если используется **Docker** необходимо изменить `192.168.99.100` на `localhost`
+
 * склонировать репозиторий `git clone https://github.com/12ok/aqa--diploma`
 * запустить docker container `docker-compose up -d` Дождаться пока контейнеры запустятся
 ### Для запуска приложения с MySQL
@@ -36,6 +35,8 @@
 * выполнить команду для формирования отчета `gradlew allureReport`
 * отчет о выполнении тестов находится в директории `build/reports/allure-report/`
 * выполнить команду для открытия отчета в браузере `gradlew allureServe`
+
+* после окончания тестов остановить контейнеры `docker-compose down`
 
 
 

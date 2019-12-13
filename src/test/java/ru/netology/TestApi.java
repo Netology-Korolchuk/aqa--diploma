@@ -37,7 +37,6 @@ public class TestApi {
         DbInteraction.clearDB();
     }
 
-
     @Story("Проверка обработки approved card")
     @Severity(SeverityLevel.BLOCKER)
     @ParameterizedTest
@@ -86,7 +85,6 @@ public class TestApi {
         String response = ApiInteraction.sentPaymentByApprovedCardBadField(approvedCard, url);
         ApiInteraction.assertBadRequest(response);
     }
-    //todo issue ex-"Bad request" fac-approved
 
     @Story("Проверка обработки невалидного body")
     @Severity(SeverityLevel.NORMAL)
@@ -109,7 +107,6 @@ public class TestApi {
         String response = ApiInteraction.sentPaymentOnlyNumber(url);
         ApiInteraction.assertBadRequest(response);
     }
-    //todo issue ex-"Bad request" fac-approved
 
     @Step("Выбор проверки БД для approved/declined card")
     public void selectDbAssertAfterValidate(String url, String paymentResult) {

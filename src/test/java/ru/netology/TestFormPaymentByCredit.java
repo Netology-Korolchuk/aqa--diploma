@@ -65,7 +65,6 @@ public class TestFormPaymentByCredit {
         page.setFormFiled(declinedCard);
         page.assertBadMessage();
     }
-    //todo issue ex -"declined" fac -"approved"
 
     @Story("Проверка обработки NoDb card")
     @Severity(SeverityLevel.CRITICAL)

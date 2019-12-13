@@ -41,19 +41,6 @@ public class ApiInteraction {
         return bodyResponse.getStatus();
     }
 
-    @Step("Отправка POST запроса только с номером карты в body")
-    public static String sentPaymentOnlyNumber(String url) {
-        return given()
-                .spec(requestSpec)
-                .body("{\"number\" : \"4444 4444 4444 4441\"}")
-                .when()
-                .post(url)
-                .then()
-                .statusCode(400)
-                .extract()
-                .body().asString();
-    }
-
     @Step("Отправка POST запроса с NoDb card")
     public static String sentPaymentByNoDbCard(Card card, String url) {
         return given()
@@ -63,6 +50,19 @@ public class ApiInteraction {
                 .post(url)
                 .then()
                 .statusCode(500)
+                .extract()
+                .body().asString();
+    }
+
+    @Step("Отправка POST запроса только с номером карты в body")
+    public static String sentPaymentOnlyNumber(String url) {
+        return given()
+                .spec(requestSpec)
+                .body("{\"number\" : \"4444 4444 4444 4441\"}")
+                .when()
+                .post(url)
+                .then()
+                .statusCode(400)
                 .extract()
                 .body().asString();
     }

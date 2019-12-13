@@ -23,7 +23,6 @@ public class TestFormPaymentByCard {
     private Card declinedCard;
     private Card noDbCard;
 
-
     @BeforeAll
     static void setUpAll() {
         SelenideLogger.addListener("allure", new AllureSelenide());
@@ -69,7 +68,6 @@ public class TestFormPaymentByCard {
         page.setFormFiled(declinedCard);
         page.assertBadMessage();
     }
-    //todo issue ex -"declined" fac -"approved"
 
     @Story("Проверка обработки NoDb card")
     @Severity(SeverityLevel.CRITICAL)

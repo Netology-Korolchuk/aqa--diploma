@@ -54,7 +54,7 @@ public class DbInteraction {
     public static String getPaymentByCredit() {
         val paymentSql = "SELECT status FROM credit_request_entity WHERE bank_id = (SELECT credit_id FROM order_entity ORDER BY created DESC limit 1);";
         try (val conn = DriverManager.getConnection(url, userDB, password)) {
-            return runner.query(conn, paymentSql, new  ScalarHandler<> ());
+            return runner.query(conn, paymentSql, new ScalarHandler<>());
         }
     }
 }
